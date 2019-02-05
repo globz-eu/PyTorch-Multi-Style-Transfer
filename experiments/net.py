@@ -44,13 +44,13 @@ class Basicblock(nn.Module):
             self.residual_layer = nn.Conv2d(inplanes, planes,
                                                         kernel_size=1, stride=stride)
         conv_block=[]
-        conv_block+=[norm_layer(inplanes),
+        conv_block+=[norm_layer(inplanes, track_running_stats=True),
                                 nn.ReLU(inplace=True),
                                 ConvLayer(inplanes, planes, kernel_size=3, stride=stride),
-                                norm_layer(planes),
+                                norm_layer(planes, track_running_stats=True),
                                 nn.ReLU(inplace=True),
                                 ConvLayer(planes, planes, kernel_size=3, stride=1),
-                                norm_layer(planes)]
+                                norm_layer(planes, track_running_stats=True)]
         self.conv_block = nn.Sequential(*conv_block)
     
     def forward(self, input):
@@ -71,10 +71,10 @@ class UpBasicblock(nn.Module):
         self.residual_layer = UpsampleConvLayer(inplanes, planes,
                                                       kernel_size=1, stride=1, upsample=stride)
         conv_block=[]
-        conv_block+=[norm_layer(inplanes),
+        conv_block+=[norm_layer(inplanes, track_running_stats=True),
                                 nn.ReLU(inplace=True),
                                 UpsampleConvLayer(inplanes, planes, kernel_size=3, stride=1, upsample=stride),
-                                norm_layer(planes),
+                                norm_layer(planes, track_running_stats=True),
                                 nn.ReLU(inplace=True),
                                 ConvLayer(planes, planes, kernel_size=3, stride=1)]
         self.conv_block = nn.Sequential(*conv_block)
@@ -96,13 +96,13 @@ class Bottleneck(nn.Module):
             self.residual_layer = nn.Conv2d(inplanes, planes * self.expansion,
                                                         kernel_size=1, stride=stride)
         conv_block = []
-        conv_block += [norm_layer(inplanes),
+        conv_block += [norm_layer(inplanes, track_running_stats=True),
                                     nn.ReLU(inplace=True),
                                     nn.Conv2d(inplanes, planes, kernel_size=1, stride=1)]
-        conv_block += [norm_layer(planes),
+        conv_block += [norm_layer(planes, track_running_stats=True),
                                     nn.ReLU(inplace=True),
                                     ConvLayer(planes, planes, kernel_size=3, stride=stride)]
-        conv_block += [norm_layer(planes),
+        conv_block += [norm_layer(planes, track_running_stats=True),
                                     nn.ReLU(inplace=True),
                                     nn.Conv2d(planes, planes * self.expansion, kernel_size=1, stride=1)]
         self.conv_block = nn.Sequential(*conv_block)
@@ -126,13 +126,13 @@ class UpBottleneck(nn.Module):
         self.residual_layer = UpsampleConvLayer(inplanes, planes * self.expansion,
                                                       kernel_size=1, stride=1, upsample=stride)
         conv_block = []
-        conv_block += [norm_layer(inplanes),
+        conv_block += [norm_layer(inplanes, track_running_stats=True),
                                     nn.ReLU(inplace=True),
                                     nn.Conv2d(inplanes, planes, kernel_size=1, stride=1)]
-        conv_block += [norm_layer(planes),
+        conv_block += [norm_layer(planes, track_running_stats=True),
                                     nn.ReLU(inplace=True),
                                     UpsampleConvLayer(planes, planes, kernel_size=3, stride=1, upsample=stride)]
-        conv_block += [norm_layer(planes),
+        conv_block += [norm_layer(planes, track_running_stats=True),
                                     nn.ReLU(inplace=True),
                                     nn.Conv2d(planes, planes * self.expansion, kernel_size=1, stride=1)]
         self.conv_block = nn.Sequential(*conv_block)
@@ -267,7 +267,7 @@ class Net(nn.Module):
 
         model1 = []
         model1 += [ConvLayer(input_nc, 64, kernel_size=7, stride=1),
-                            norm_layer(64),
+                            norm_layer(64, track_running_stats=True),
                             nn.ReLU(inplace=True),
                             block(64, 32, 2, 1, norm_layer),
                             block(32*expansion, ngf, 2, 1, norm_layer)]
@@ -283,7 +283,7 @@ class Net(nn.Module):
         
         model += [upblock(ngf*expansion, 32, 2, norm_layer),
                             upblock(32*expansion, 16, 2, norm_layer),
-                            norm_layer(16*expansion),
+                            norm_layer(16*expansion, track_running_stats=True),
                             nn.ReLU(inplace=True),
                             ConvLayer(16*expansion, output_nc, kernel_size=7, stride=1)]
 
@@ -296,5 +296,3 @@ class Net(nn.Module):
 
     def forward(self, input):
         return self.model(input)
-
-

@@ -2,3 +2,6 @@
 *.swp
 *.pyc
 *.pth
+stylized
+__pycache__
+*.model
